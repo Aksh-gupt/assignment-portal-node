@@ -6,14 +6,14 @@ const auth = async (req, res, next) => {
     try{
         const token = req.header('Authorization').replace('Bearer ','')
         // console.log(token);
-        const decoded = jwt.verify(token,"this_is_token_of_student")
+        const decoded = jwt.verify(token,"this_is_jwt_token_of_admin")
         const admin = await Admin.findOne({_id: decoded._id, 'tokens.token': token})
         if(!admin){
             throw new Error()
         }
         req.token = token
         req.admin = admin
-        // console.log(req.user.name);
+        // console.log(req.admin.name);
         next()
     }catch(e){
         res.status(401).send("Please authenticate")

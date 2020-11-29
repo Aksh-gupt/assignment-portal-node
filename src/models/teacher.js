@@ -21,15 +21,6 @@ const userSchema = new mongoose.Schema({
             type:Number,
             required: true
         },
-        // batch:{
-        //     type: Number
-        // },
-        // stream:{
-        //     type: Number
-        // },
-        // section:{
-        //     type: Number
-        // },
         subject:{
             type: Number,
             required: true
@@ -74,6 +65,17 @@ userSchema.virtual('assignment',{
     localField: '_id',
     foreignField: 'owner'
 })
+
+userSchema.methods.toJSON = function(){
+    const teacher = this
+    const teacherObject = teacher.toObject()
+
+    delete teacherObject.password;
+    delete teacherObject.tokens;
+    delete teacherObject.resetId;
+
+    return teacherObject
+}
 
 userSchema.methods.generateResetId = async function(){
     const teacher = this

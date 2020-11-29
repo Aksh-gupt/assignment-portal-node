@@ -12,9 +12,9 @@ router.post("/teacher/signup",authAdmin,async (req, res) => {
         await teacher.save();
         // const token = await teacher.generateAuthToken();
         // sendWelcomeEmail(teacher.email,teacher.name)
-        res.status(201).send({teacher})
+        res.status(201).send(teacher)
     }catch(e){
-        res.status(400).send(e)
+        res.status(400).send({code:e.code, msg:e.errmsg})
     }
     
 })
@@ -28,6 +28,15 @@ router.post("/teacher/login", async(req, res) => {
         res.send({teacher, token});
     }catch(e){
         res.status(400).send()
+    }
+})
+
+router.get("/allteacher",async(req,res) => {
+    try{
+        const teacher = await Teacher.find({});
+        res.send(teacher);
+    }catch(e){
+        res.status(400).send(e);
     }
 })
 

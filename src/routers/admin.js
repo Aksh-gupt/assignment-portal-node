@@ -17,16 +17,16 @@ router.post("/admin/signup",async (req, res) => {
     }
     
 })
-
+ 
 // LOGIN admin
 router.post("/admin/login", async(req, res) => {
-    // console.log("run");
     try{
         const admin = await Admin.findByCredentials(req.body.email, req.body.password);
         const token = await admin.generateAuthToken()
         res.send({admin, token});
     }catch(e){
-        res.status(400).send()
+        // console.log(e," error")
+        res.status(400).send(e)
     }
 })
 

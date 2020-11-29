@@ -51,10 +51,22 @@ const userSchema = new mongoose.Schema({
 //     foreignField: 'owner'
 // })
 
+userSchema.methods.toJSON = function(){
+    const admin = this
+    const adminObject = admin.toObject()
+
+    delete adminObject.password;
+    delete adminObject.tokens;
+    delete adminObject.resetId;
+    delete adminObject.email;
+
+    return adminObject
+}
+
 userSchema.methods.generateAuthToken = async function(){
     const admin = this
     const token = jsonwebtoken.sign({_id: admin._id.toString()}, "this_is_jwt_token_of_admin")
-    admin.tokens = user.tokens.concat({token})
+    admin.tokens = admin.tokens.concat({token})
     await admin.save()
     return token
 }
@@ -62,7 +74,7 @@ userSchema.methods.generateAuthToken = async function(){
 userSchema.statics.findByCredentials = async (email,password) => {
     const admin = await Admin.findOne({email})
     if(!admin){
-        throw new Error("No existing user with this email id")
+        throw new Error("No existing admin with this email id")
     }
     const isMatch = await bcrypt.compare(password,admin.password)
     if(!isMatch){

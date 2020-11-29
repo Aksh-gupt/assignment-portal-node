@@ -12,9 +12,10 @@ router.post("/student/signup",authAdmin,async (req, res) => {
         await student.save();
         // const token = await student.generateAuthToken();
         // sendWelcomeEmail(student.email,student.name)
-        res.status(201).send({student})
+        res.status(201).send(student)
     }catch(e){
-        res.status(400).send(e)
+        // console.log(e);
+        res.status(400).send({code:e.code, msg:e.errmsg})
     }
     
 })
@@ -26,6 +27,15 @@ router.post("/student/login", async(req, res) => {
         const student = await Student.findByCredentials(req.body.email, req.body.password);
         const token = await student.generateAuthToken()
         res.send({student, token});
+    }catch(e){
+        res.status(400).send()
+    }
+})
+
+router.get("/allstudent",authAdmin,async(req,res) => {
+    try{
+        const student = await Student.find({});
+        res.send(student)
     }catch(e){
         res.status(400).send()
     }

@@ -8,7 +8,13 @@ const uniqueString = require('unique-string')
 const userSchema = new mongoose.Schema({
     name:{
         type: String,
+        trim: true,
+        required: true
+    },
+    enrollment:{
+        type:String,
         required: true,
+        unique: true,
         trim: true
     },
     bss:{
@@ -30,7 +36,6 @@ const userSchema = new mongoose.Schema({
     email:{
         type: String,
         unique: true,
-        required: true,
         trim: true,
         validate(value){
             if(!validator.isEmail(value)){
@@ -66,6 +71,17 @@ userSchema.virtual('submission',{
     localField: '_id',
     foreignField: 'owner'
 })
+
+userSchema.methods.toJSON = function(){
+    const student = this
+    const studentObject = student.toObject()
+
+    delete studentObject.password;
+    delete studentObject.tokens;
+    delete studentObject.resetId;
+
+    return studentObject
+}
 
 userSchema.methods.generateResetId = async function(){
     const student = this
