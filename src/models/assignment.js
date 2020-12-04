@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
         type:Number,
         required : true
     },
-    subject:{
+    subid:{
         type: String,
         required: true
     },

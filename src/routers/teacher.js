@@ -1,6 +1,7 @@
 const express = require("express")
 const router = new express.Router()
 const Teacher = require("../models/teacher")
+const Subject = require("../models/subject")
 const authTeacher = require("../middleware/authTeacher")
 const authAdmin = require("../middleware/authAdmin")
 // const { sendWelcomeEmail, resetPassword } = require('../email/account')
@@ -26,6 +27,27 @@ router.post("/teacher/login", async(req, res) => {
         const teacher = await Teacher.findByCredentials(req.body.email, req.body.password);
         const token = await teacher.generateAuthToken()
         res.send({teacher, token});
+    }catch(e){
+        res.status(400).send(e)
+    }
+})
+
+router.post("/teacher/addsubject",authTeacher,async(req,res) => {
+    try{
+        const subject = await Subject.findOne({name: req.body.subject})
+        req.teacher.teach = req.teacher.teach.concat({bsss: req.body.bsss, subject: req.body.subject, subid: subject.subid});
+        await req.teacher.save();
+        var len = req.teacher.teach.length
+        res.status(200).send(req.teacher.teach[len-1]);
+    }catch(e){
+        // console.log(e)
+        res.status(400).send(e);
+    }
+})
+
+router.get("/teacher/mysubject",authTeacher,async(req,res) => {
+    try{
+        res.status(200).send(req.teacher.teach)
     }catch(e){
         res.status(400).send()
     }

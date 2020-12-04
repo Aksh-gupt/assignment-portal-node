@@ -5,7 +5,7 @@ const assignmentRouter = require("./routers/assignment")
 const studentRouter = require("./routers/student")
 const submissionRouter = require("./routers/submission")
 const teacherRouter = require("./routers/teacher")
-const subjectRouter = require("./routers/student")
+const subjectRouter = require("./routers/subject")
 
 const app = express()
  

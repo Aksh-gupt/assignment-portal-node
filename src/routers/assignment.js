@@ -1,18 +1,41 @@
 const express = require("express")
+const multer = require("multer")
 const router = new express.Router()
 const Assignment = require("../models/assignment")
 const authTeacher = require("../middleware/authTeacher")
 
-router.post("/assignment/make",authTeacher ,async (req,res) => {
-    const assignment = new Assignment({
-        ...req.body,
-        owner: req.teacher._id
-    })
+
+const upload = multer({
+    dest: "files",
+    limits: {
+        fileSize: 5000000
+    },
+    fileFilter(req,file,cb){
+        if(!file.originalname.endsWith(".pdf")){
+            throw new Error("Please upload a pdf")
+        }
+
+        cb(undefined,true)
+    }
+})
+
+router.post("/assignment/make",authTeacher,upload.single('document') ,async (req,res) => {
+    // const assignment = new Assignment({
+    //     document: req.file.buffer,
+    //     name: req.body.name,
+    //     bss: req.body.bss,
+    //     subid: req.body.subid,
+    //     last: req.body.last,
+    //     description: req.body.description,
+    //     owner: req.teacher._id
+    // })
     
     try{
-        // console.log(code);
-        await assignment.save()
-        res.status(201).send(code)
+        // console.log(assignment);
+        // await assignment.save()
+        console.log(req.body)
+        console.log(req.file)
+        res.status(201).send()
     }catch(e){
         res.status(400).send(e)
     }

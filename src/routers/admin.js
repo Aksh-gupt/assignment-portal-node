@@ -2,6 +2,7 @@ const express = require("express")
 const router = new express.Router()
 const Admin = require("../models/admin")
 const authAdmin = require("../middleware/authAdmin")
+const Subject = require("../models/subject")
 // const { sendWelcomeEmail, resetPassword } = require('../email/account')
 
 // CREATE ADMIN

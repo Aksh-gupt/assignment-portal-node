@@ -17,13 +17,18 @@ const userSchema = new mongoose.Schema({
         trim: true
     },
     teach:[{
-        bss:{
+        bsss:{                // B => Batch,   S => Section,   S => Stream,  S => Semester
             type:Number,
             required: true
         },
         subject:{
-            type: Number,
+            type: String,
             required: true
+        },
+        subid:{
+            type:String,
+            required: true,
+            trim: true
         }
     }],
     email:{
@@ -89,7 +94,7 @@ userSchema.methods.generateResetId = async function(){
 userSchema.methods.generateAuthToken = async function(){
     const teacher = this
     const token = jsonwebtoken.sign({_id: teacher._id.toString()}, "this_is_jwt_token_of_teacher")
-    teacher.tokens = user.tokens.concat({token})
+    teacher.tokens = teacher.tokens.concat({token})
     await teacher.save()
     return token
 }
