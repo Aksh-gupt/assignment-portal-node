@@ -16,11 +16,10 @@ const userSchema = new mongoose.Schema({
         required: true
     },
     document:{
-        type: Buffer,
-        required: true  
+        type: Buffer 
     },
     last:{
-        type: Date,
+        type: String,
         required: true  
     },
     description:{
