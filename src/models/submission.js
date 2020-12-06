@@ -20,7 +20,11 @@ const userSchema = new mongoose.Schema({
         required: true  
     },
     description:{
-        type: String  
+        type: String
+    },
+    assignmentid:{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
     },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
