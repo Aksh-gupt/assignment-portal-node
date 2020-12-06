@@ -95,13 +95,13 @@ userSchema.methods.generateResetId = async function(){
 userSchema.methods.generateAuthToken = async function(){
     const student = this
     const token = jsonwebtoken.sign({_id: student._id.toString()}, "this_is_jwt_token_of_student")
-    student.tokens = user.tokens.concat({token})
+    student.tokens = student.tokens.concat({token})
     await student.save()
     return token
 }
 
-userSchema.statics.findByCredentials = async (email,password) => {
-    const student = await Student.findOne({email})
+userSchema.statics.findByCredentials = async (enrollment,password) => {
+    const student = await Student.findOne({enrollment})
     if(!student){
         throw new Error("No existing user with this email id")
     }

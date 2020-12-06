@@ -3,6 +3,8 @@ const router = new express.Router()
 const Student = require("../models/student")
 const authStudent = require("../middleware/authStudent")
 const authAdmin = require("../middleware/authAdmin")
+const Allocated = require("../models/allocatesubject")
+const Assignment = require("../models/assignment")
 // const { sendWelcomeEmail, resetPassword } = require('../email/account')
 
 // CREATE student
@@ -17,15 +19,15 @@ router.post("/student/signup",authAdmin,async (req, res) => {
         // console.log(e);
         res.status(400).send({code:e.code, msg:e.errmsg})
     }
-    
 })
 
 // LOGIN student
 router.post("/student/login", async(req, res) => {
-    // console.log("run");
+    // console.log("run"); 
     try{
         const student = await Student.findByCredentials(req.body.email, req.body.password);
         const token = await student.generateAuthToken()
+        // console.log(token);
         res.send({student, token});
     }catch(e){
         res.status(400).send()
@@ -38,6 +40,46 @@ router.get("/allstudent",authAdmin,async(req,res) => {
         res.send(student)
     }catch(e){
         res.status(400).send()
+    }
+})
+
+router.get("/student/subjects",authStudent, async(req,res) => {
+    try{
+        const year = (new Date().getFullYear())%100;
+        const month = new Date().getMonth();
+        var batch = Math.floor(req.student.bss/100);
+        var sem = year - batch;
+        sem *= 2;
+        if(month >= 7){
+            sem++;
+        }
+        var bsss = req.student.bss*10 + sem;
+        const subjects = await Allocated.find({bsss})
+        const subject = subjects.map((subject) => {
+            const temp = subject.toObject();
+            delete temp.owner
+            return temp;
+        })
+        res.status(200).send(subject)
+    }catch(e){
+        res.status(400).send(e)
+    }
+})
+
+router.post("/student/subject/assignment",authStudent, async(req,res) => {
+    try{
+        const assignments = await Assignment.find({bss: req.body.bss, subid: req.body.subid})
+        const assignment = assignments.map((assignment) => {
+            const temp = assignment.toObject();
+            delete temp.document
+            delete temp.owner
+            delete temp.subid
+            delete temp.bss
+            return temp
+        })
+        res.status(200).send(assignment)
+    }catch(e){
+        res.status(400).send(e)
     }
 })
 

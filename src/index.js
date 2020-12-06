@@ -6,6 +6,7 @@ const studentRouter = require("./routers/student")
 const submissionRouter = require("./routers/submission")
 const teacherRouter = require("./routers/teacher")
 const subjectRouter = require("./routers/subject")
+const allocatedsubjectRouter = require("./routers/allocatesubject")
 
 const app = express()
  
@@ -26,6 +27,7 @@ app.use(assignmentRouter)
 app.use(studentRouter)
 app.use(submissionRouter)
 app.use(teacherRouter)
+app.use(allocatedsubjectRouter)
 
 app.listen(port, () => {
     console.log("Server is up on port ",port);
