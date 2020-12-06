@@ -16,21 +16,21 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    teach:[{
-        bsss:{                // B => Batch,   S => Section,   S => Stream,  S => Semester
-            type:Number,
-            required: true
-        },
-        subject:{
-            type: String,
-            required: true
-        },
-        subid:{
-            type:String,
-            required: true,
-            trim: true
-        }
-    }],
+    // teach:[{
+    //     bsss:{                // B => Batch,   S => Section,   S => Stream,  S => Semester
+    //         type:Number,
+    //         required: true
+    //     },
+    //     subject:{
+    //         type: String,
+    //         required: true
+    //     },
+    //     subid:{
+    //         type:String,
+    //         required: true,
+    //         trim: true
+    //     }
+    // }],
     email:{
         type: String,
         unique: true,
