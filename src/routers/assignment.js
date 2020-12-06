@@ -39,6 +39,20 @@ router.post("/assignment/make",authTeacher,cpUpload ,async (req,res) => {
     }
 })
 
+router.get("/assignment/:id",async(req,res) => {
+    try{
+        const assignment = await Assignment.findOne({_id: req.params.id});
+        if(!assignment){
+            throw new Error("Please enter a valid url")
+        }
+        // res.set('Content-type', 'application/pdf')
+        res.send(assignment.document)
+    }catch(e){
+        console.log(e);
+        res.stauts(400).send(e);
+    }
+})
+
 router.patch("/updateassignment/:id",authTeacher , async(req,res) => {
     const updates = Object.keys(req.body); 
     const allowedUpdate = ['name', 'document', 'last','description'];
