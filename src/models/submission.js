@@ -7,20 +7,13 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    bss:{
-        type:Number,
-        required : true
-    },
-    subject:{
+    subid:{
         type: String,
         required: true
     },
     document:{
         type: Buffer,
         required: true  
-    },
-    description:{
-        type: String
     },
     assignmentid:{
         type: mongoose.Schema.Types.ObjectId,

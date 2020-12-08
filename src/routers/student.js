@@ -72,9 +72,11 @@ router.post("/student/subject/assignment",authStudent, async(req,res) => {
         const assignment = assignments.map((assignment) => {
             const temp = assignment.toObject();
             delete temp.document
-            delete temp.owner
             delete temp.subid
             delete temp.bss
+            delete temp.owner
+            delete temp.description
+            delete temp.last
             return temp
         })
         res.status(200).send(assignment)

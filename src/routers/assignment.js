@@ -2,7 +2,9 @@ const express = require("express")
 const multer = require("multer")
 const router = new express.Router()
 const Assignment = require("../models/assignment")
+const Teacher = require("../models/teacher")
 const authTeacher = require("../middleware/authTeacher")
+const authStudent = require("../middleware/authStudent")
 
 
 const upload = multer({
@@ -17,7 +19,7 @@ const upload = multer({
     //     cb(undefined,true)
     // }
 })
-
+// THIS IS FOR TEACHER TO MAKE OR ASSIGN THE ASSIGNMENT
 var cpUpload = upload.fields([{ name: 'document', maxCount: 1 }, { name: 'overrides', maxCount: 1 }])
 router.post("/assignment/make",authTeacher,cpUpload ,async (req,res) => {
     try{
@@ -39,7 +41,8 @@ router.post("/assignment/make",authTeacher,cpUpload ,async (req,res) => {
     }
 })
 
-router.get("/assignment/:id",async(req,res) => {
+// THIS IS TO SEND THE PDF OF A PARTICULAR ASSIGNMENT TO STUDENT
+router.get("/assignment/pdf/:id",async(req,res) => {
     try{
         const assignment = await Assignment.findOne({_id: req.params.id});
         if(!assignment){
@@ -50,6 +53,37 @@ router.get("/assignment/:id",async(req,res) => {
     }catch(e){
         console.log(e);
         res.stauts(400).send(e);
+    }
+})
+
+// SEND THE DETAIL OF A PARTICULAR ASSIGMENT TO STUDENT
+router.get("/assignment/details/:id",authStudent, async(req,res) => {
+    try{
+        const details = await Assignment.findOne({_id: req.params.id});
+        if(!details){
+            throw new Error("Please enter a valid url")
+        }
+        const assignment = details.toObject();
+        // REQ.STUDENT.BSS === ASSIGNMENT.BSS
+        delete assignment.document;
+        delete assignment.bss;
+        delete assignment.subid;
+
+        const teacherdetail = await Teacher.findOne({_id: assignment.owner});
+        if(!teacherdetail){
+            throw new Error("This teacher not exists")
+        }
+        delete assignment.owner
+        const teacher = teacherdetail.toObject();
+        delete teacher.email;
+        delete teacher.password;
+        delete teacher.resetId;
+        delete teacher.tokens;
+        delete teacher._id
+
+        res.status(200).send({assignment, teacher})
+    }catch(e){
+        res.status(400).send(e.errmsg)
     }
 })
 
@@ -77,6 +111,7 @@ router.patch("/updateassignment/:id",authTeacher , async(req,res) => {
     }
 })
 
+//  THIS IS WHEN TEACHER WANT TO SEE ALL THE ASSIGNMENT OF PARTICULAR SUBJECT
 router.post("/allassignment",authTeacher ,async(req,res) => {
     try{
         const assignments = await Assignment.find({owner: req.teacher._id, subid: req.body.subid, bss: req.body.bss});
