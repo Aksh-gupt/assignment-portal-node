@@ -85,6 +85,31 @@ router.post("/student/subject/assignment",authStudent, async(req,res) => {
     }
 })
 
+router.post('/student/update/:id',authAdmin,async(req,res) => {
+    console.log("run")
+    const updates = Object.keys(req.body); 
+    const allowedUpdate = ['name','email','enrollment'];
+    const isValid = updates.every((update) =>  allowedUpdate.includes(update) )
+    if(!isValid){
+        
+        return res.status(400).send("Invalid request")
+    }
+    try{
+        
+        const student = await Student.findOne({_id: req.params.id});
+        if(!student){
+            console.log("update");
+            res.status(404).send()
+        }
+
+        updates.forEach((update) => student[update] = req.body[update])
+        await student.save()
+        res.send(updates)
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
 router.get("/student/getname",authStudent ,async (req,res) => {
     try{
         // console.log(req.student.name);

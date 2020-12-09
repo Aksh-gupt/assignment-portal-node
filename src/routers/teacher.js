@@ -63,6 +63,29 @@ router.post('/teacher/logout', authTeacher, async(req, res) => {
     }
 })
 
+router.post('/teacher/update/:id',authAdmin,async(req,res) => {
+    const updates = Object.keys(req.body); 
+    const allowedUpdate = ['name','email','department'];
+    const isValid = updates.every((update) =>  allowedUpdate.includes(update) )
+    if(!isValid){
+        return res.status(400).send("Invalid request")
+    }
+
+    try{
+        // console.log("update");
+        const teacher = await Teacher.findOne({_id: req.params.id});
+        if(!teacher){
+            res.status(404).send()
+        }
+
+        updates.forEach((update) => teacher[update] = req.body[update])
+        await teacher.save()
+        res.send()
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
 router.delete("/teacher/delete", authTeacher, async(req,res) => {
     try{
         await req.teacher.remove()

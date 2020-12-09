@@ -24,6 +24,29 @@ router.get("/allsubject",async(req,res) => {
     }
 })
 
+router.post('/subject/update/:id',authAdmin,async(req,res) => {
+    const updates = Object.keys(req.body); 
+    const allowedUpdate = ['name','code','subid','type'];
+    const isValid = updates.every((update) =>  allowedUpdate.includes(update) )
+    if(!isValid){
+        return res.status(400).send("Invalid request")
+    }
+
+    try{
+        // console.log("update");
+        const subject = await Subject.findOne({_id: req.params.id});
+        if(!subject){
+            res.status(404).send()
+        }
+
+        updates.forEach((update) => subject[update] = req.body[update])
+        await subject.save()
+        res.send(updates)
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
 router.get("/subjects/name",authTeacher,async(req,res) => {
     try{
         const subjects = await Subject.find({})

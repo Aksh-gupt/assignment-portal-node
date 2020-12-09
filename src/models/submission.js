@@ -19,11 +19,17 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
+    status:{
+        type:String,
+        required: true
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'Student'
     }
+},{
+    timestamps: {currentTime: () => Date.now()+1.98e+7}
 })
 const Submission = mongoose.model('Submission',userSchema)
 
