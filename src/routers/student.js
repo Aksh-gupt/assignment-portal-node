@@ -3,6 +3,7 @@ const router = new express.Router()
 const Student = require("../models/student")
 const authStudent = require("../middleware/authStudent")
 const authAdmin = require("../middleware/authAdmin")
+const authTeacher = require("../middleware/authTeacher")
 const Allocated = require("../models/allocatesubject")
 const Assignment = require("../models/assignment")
 // const { sendWelcomeEmail, resetPassword } = require('../email/account')
@@ -109,6 +110,19 @@ router.post('/student/update/:id',authAdmin,async(req,res) => {
         res.status(500).send()
     }
 })
+
+router.get("/student/enrollment/:owner",authTeacher,async(req,res) => {
+    try{
+        const student = await Student.findOne({_id: req.params.owner});
+        if(!student){
+            throw new Error("Student not found");
+        }
+        res.status(200).send({enrollment: student.enrollment})
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+})
+
 
 router.get("/student/getname",authStudent ,async (req,res) => {
     try{

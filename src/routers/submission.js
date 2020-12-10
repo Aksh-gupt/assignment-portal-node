@@ -37,6 +37,23 @@ router.post("/submission/make",authStudent,cpUpload ,async (req,res) => {
     }
 })
 
+router.post("/submission/update",authStudent,cpUpload ,async (req,res) => {
+    try{
+        const val = JSON.parse(req.files['overrides'][0].buffer.toString())
+        const submission = await Submission.findOne({assignmentid: val._id, owner: req.student._id});
+        if(!submission){
+            throw new Error("There is no such submission");
+        }
+        submission.document = req.files['document'][0].buffer;
+        submission.status = "Not review";
+        await submission.save()
+        res.status(201).send({status: submission.status, createdAt: submission.createdAt })
+    }catch(e){
+        // console.log(e.error)
+        res.status(400).send(e)
+    }
+})
+
 router.patch("/updatesubmission/:id",authStudent , async(req,res) => {
     const updates = Object.keys(req.body); 
     const allowedUpdate = ['document'];

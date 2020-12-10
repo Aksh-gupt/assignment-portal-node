@@ -35,7 +35,7 @@ router.post("/assignment/make",authTeacher,cpUpload ,async (req,res) => {
         })
         // console.log(assignment)
         await assignment.save()
-        res.status(201).send({_id: assignment._id, name: assignment.name})
+        res.status(201).send({_id: assignment._id, name: assignment.name, last: assignment.last})
     }catch(e){
         res.status(400).send({error: e.message})
     }
@@ -87,6 +87,42 @@ router.get("/assignment/details/:id",authStudent, async(req,res) => {
     }
 })
 
+// IF TEACHER WANT TO GET THE DETAILS OF THE ASSIGNMENT
+router.get("/teacher/assignmentdetail/:_id",authTeacher,async(req,res) => {
+    try{
+        const assignment = await Assignment.findOne({_id: req.params._id});
+        if(!assignment){
+            throw new Error("Assignment not found");
+        }
+        // This is to check is this teacher is the owner of the subject or not
+        if(assignment.owner.toString() !== req.teacher._id.toString()){
+            throw new Error("Only teacher assign the assignment can see the details of the assignment.")
+        }
+        res.status(200).send({description: assignment.description});
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+})
+
+// TO UPDATE THE LAST DATE OF THE ASSIGNMENT BY THE TEACHER
+router.patch("/assignment/updatelastdate",authTeacher,async(req,res) => {
+    try{
+        const assignment = await Assignment.findOne({_id: req.body._id});
+        if(!assignment){
+            throw new Error("This assignment not found");
+        }
+        // This is to check wheather change is done by teacher that gives the assignment or not
+        if(assignment.owner.toString() !== req.teacher._id.toString()){
+            throw new Error("Teacher can update their own assignment only");
+        }
+        assignment.last = req.body.last;
+        await assignment.save();
+        res.status(200).send({last: assignment.last});
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+})
+
 router.patch("/updateassignment/:id",authTeacher , async(req,res) => {
     const updates = Object.keys(req.body); 
     const allowedUpdate = ['name', 'document', 'last','description'];
@@ -123,7 +159,6 @@ router.post("/allassignment",authTeacher ,async(req,res) => {
             delete temp.bss;
             delete temp.document;
             delete temp.description;
-            delete temp.last;
             delete temp.subid;
             delete temp.owner;
             return temp
