@@ -4,11 +4,14 @@ const Teacher = require("../models/teacher")
 const Subject = require("../models/subject")
 const authTeacher = require("../middleware/authTeacher")
 const authAdmin = require("../middleware/authAdmin")
-// const { sendWelcomeEmail, resetPassword } = require('../email/account')
+const { resetPassword } = require('../email/account')
 
 // CREATE TEACHER
 router.post("/teacher/signup",authAdmin,async (req, res) => {
-    const teacher = new Teacher(req.body);
+    const teacher = new Teacher({
+        ...req.body,
+        resetpassword: false
+    });
     try{
         await teacher.save();
         // const token = await teacher.generateAuthToken();
@@ -42,10 +45,11 @@ router.get("/allteacher",async(req,res) => {
     }
 })
 
-router.get("/teacher/getname",authTeacher ,async (req,res) => {
+// THIS IS TO GET NAME AND RESET BUTTON WILL PRESENT OR NOT INFO
+router.get("/teacher/teacherinfo",authTeacher ,async (req,res) => {
     try{
-        // console.log(req.teacher.name);
-        res.status(200).send({name:req.teacher.name});
+        // console.log(req.teacher.name); 
+        res.status(200).send({name:req.teacher.name, reset: req.teacher.resetpassword});
     }catch(e){
         res.status(400).send(e);
     }
@@ -95,7 +99,7 @@ router.delete("/teacher/delete", authTeacher, async(req,res) => {
     }
 }) 
 
-router.post("/teacher/resetrequest", async(req,res) => {
+router.post("/teacher/forgotpassword", async(req,res) => {
     const email = req.body.email
     try{
         const teacher = await Teacher.findOne({email})
@@ -104,10 +108,20 @@ router.post("/teacher/resetrequest", async(req,res) => {
         }
         const resetId = await teacher.generateResetId();
         // console.log("this is running")
-        // resetPassword(teacher.email,teacher.name,resetId); // This is to send email
+        resetPassword(teacher.email,teacher.name,resetId,'teacher'); // This is to send email
         res.status(200).send({text: "check your email"});
     }catch(e){
-        res.status(500).send(e)
+        res.status(500).send({error: e.message})
+    }
+})
+
+router.get("/teacher/resetpassword",authTeacher,async(req,res) => {
+    try{
+        const resetId = await req.teacher.generateResetId();
+        resetPassword(req.teacher.email,req.teacher.name,resetId,'teacher');
+        res.status(200).send({text: "check your email"});
+    }catch(e){
+        res.status(500).send({error: e.message});
     }
 })
 
@@ -119,13 +133,14 @@ router.post("/teacher/resetpass/:id",async(req,res) => {
         const teacher = await Teacher.findOne({resetId: req.params.id})
 
         if(!teacher){
-            return res.status(404).send({text: "This is invalid url"})
+            return res.status(404).send({error: "This link is not valid please check your email for updated one."})
         }
 
         teacher.password = req.body.password
         teacher.resetId = '';
+        teacher.resetpassword = true;
         await teacher.save();
-        res.send(teacher)
+        res.send({text: `${teacher.name} your password update successfully.`}) 
     }catch(e){
         res.status(500).send(e)
     }

@@ -63,6 +63,15 @@ userSchema.methods.toJSON = function(){
     return adminObject
 }
 
+userSchema.methods.generateResetId = async function(){
+    const admin = this
+    const resetId = uniqueString();
+    // console.log(resetId);
+    admin.resetId = resetId
+    await admin.save()
+    return resetId
+}
+
 userSchema.methods.generateAuthToken = async function(){
     const admin = this
     const token = jsonwebtoken.sign({_id: admin._id.toString()}, "this_is_jwt_token_of_admin")

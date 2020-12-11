@@ -3,7 +3,7 @@ const router = new express.Router()
 const Admin = require("../models/admin")
 const authAdmin = require("../middleware/authAdmin")
 const Subject = require("../models/subject")
-// const { sendWelcomeEmail, resetPassword } = require('../email/account')
+const { resetPassword } = require('../email/account')
 
 // CREATE ADMIN
 router.post("/admin/signup",async (req, res) => {
@@ -61,7 +61,7 @@ router.delete("/admin/delete", authAdmin, async(req,res) => {
     }
 }) 
 
-router.post("/admin/resetrequest", async(req,res) => {
+router.post("/admin/forgotpassword", async(req,res) => {
     const email = req.body.email
     try{
         const admin = await Admin.findOne({email})
@@ -70,10 +70,10 @@ router.post("/admin/resetrequest", async(req,res) => {
         }
         const resetId = await admin.generateResetId();
         // console.log("this is running")
-        // resetPassword(admin.email,admin.name,resetId); // This is to send email
+        resetPassword(admin.email,admin.name,resetId,'admin'); // This is to send email
         res.status(200).send({text: "check your email"});
     }catch(e){
-        res.status(500).send(e)
+        res.status(500).send({error: e.message})
     }
 })
 
@@ -85,13 +85,13 @@ router.post("/admin/resetpass/:id",async(req,res) => {
         const admin = await Admin.findOne({resetId: req.params.id})
 
         if(!admin){
-            return res.status(404).send({text: "This is invalid url"})
+            return res.status(404).send({error: "This link is not valid please check your email for updated one."})
         }
 
         admin.password = req.body.password
         admin.resetId = '';
         await admin.save();
-        res.send(admin)
+        res.send({text: `${admin.name} your password update successfully.`})
     }catch(e){
         res.status(500).send(e)
     }

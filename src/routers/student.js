@@ -6,11 +6,14 @@ const authAdmin = require("../middleware/authAdmin")
 const authTeacher = require("../middleware/authTeacher")
 const Allocated = require("../models/allocatesubject")
 const Assignment = require("../models/assignment")
-// const { sendWelcomeEmail, resetPassword } = require('../email/account')
+const { resetPassword } = require('../email/account')
 
 // CREATE student
 router.post("/student/signup",authAdmin,async (req, res) => {
-    const student = new Student(req.body);
+    const student = new Student({
+        ...req.body,
+        resetpassword: false
+    });
     try{
         await student.save();
         // const token = await student.generateAuthToken();
@@ -123,11 +126,11 @@ router.get("/student/enrollment/:owner",authTeacher,async(req,res) => {
     }
 })
 
-
-router.get("/student/getname",authStudent ,async (req,res) => {
+// THIS IS TO GET NAME AND RESET BUTTON WILL PRESENT OR NOT INFO
+router.get("/student/studentinfo",authStudent ,async (req,res) => {
     try{
         // console.log(req.student.name);
-        res.status(200).send({name:req.student.name});
+        res.status(200).send({name:req.student.name, reset: req.student.resetpassword});
     }catch(e){
         res.status(400).send(e);
     }
@@ -154,7 +157,8 @@ router.delete("/student/delete", authStudent, async(req,res) => {
     }
 }) 
 
-router.post("/student/resetrequest", async(req,res) => {
+// THIS IS WHEN STUDENT CALL IT FROM FORGET PASSWORD
+router.post("/student/forgotpassword", async(req,res) => {
     const email = req.body.email
     try{
         const student = await Student.findOne({email})
@@ -163,10 +167,20 @@ router.post("/student/resetrequest", async(req,res) => {
         }
         const resetId = await student.generateResetId();
         // console.log("this is running")
-        // resetPassword(student.email,student.name,resetId); // This is to send email
+        resetPassword(student.email,student.name,resetId,'student'); // This is to send email
         res.status(200).send({text: "check your email"});
     }catch(e){
-        res.status(500).send(e)
+        res.status(500).send({error: e.message})
+    }
+})
+
+router.get("/student/resetpassword",authStudent,async(req,res) => {
+    try{
+        const resetId = await req.student.generateResetId();
+        resetPassword(req.student.email,req.student.name,resetId,'student');
+        res.status(200).send({text: "check your email"});
+    }catch(e){
+        res.status(500).send({error: e.message});
     }
 })
 
@@ -178,13 +192,14 @@ router.post("/student/resetpass/:id",async(req,res) => {
         const student = await Student.findOne({resetId: req.params.id})
 
         if(!student){
-            return res.status(404).send({text: "This is invalid url"})
+            return res.status(404).send({error: "This link is not valid please check your email for updated one."})
         }
 
         student.password = req.body.password
         student.resetId = '';
+        student.resetpassword = true;
         await student.save();
-        res.send(student)
+        res.send({text: `${student.name} your password update successfully.`})
     }catch(e){
         res.status(500).send(e)
     }

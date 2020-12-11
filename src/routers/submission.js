@@ -44,9 +44,11 @@ router.post("/submission/update",authStudent,cpUpload ,async (req,res) => {
         if(!submission){
             throw new Error("There is no such submission");
         }
+        // console.log("run");
         submission.document = req.files['document'][0].buffer;
         submission.status = "Not review";
         await submission.save()
+        // console.log(submission);
         res.status(201).send({status: submission.status, createdAt: submission.createdAt })
     }catch(e){
         // console.log(e.error)
@@ -68,12 +70,11 @@ router.patch("/updatesubmission/:id",authStudent , async(req,res) => {
         if(!submission){
             res.status(404).send()
         }
-
         updates.forEach((update) => submission[update] = req.body[update])
         await submission.save()
         res.send(submission)
     }catch(e){
-        console.log("error");
+        // console.log("error");
         res.status(500).send()
     }
 })
