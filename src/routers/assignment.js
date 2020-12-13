@@ -41,14 +41,29 @@ router.post("/assignment/make",authTeacher,cpUpload ,async (req,res) => {
     }
 })
 
-// THIS IS TO SEND THE PDF OF A PARTICULAR ASSIGNMENT TO STUDENT
-router.get("/assignment/pdf/:id",async(req,res) => {
+// THIS IS TO SEND THE PDF OF A PARTICULAR ASSIGNMENT TO TEACHER
+router.get("/assignment/pdf/teacher/:id",authTeacher,async(req,res) => {
     try{
         const assignment = await Assignment.findOne({_id: req.params.id});
         if(!assignment){
             throw new Error("Please enter a valid url")
         }
-        // res.set('Content-type', 'application/pdf')
+        res.set('Content-type', 'application/pdf')
+        res.send(assignment.document)
+    }catch(e){
+        console.log(e);
+        res.stauts(400).send(e);
+    }
+})
+
+// THIS IS TO SEND THE PDF OF A PARTICULAR ASSIGNMENT TO STUDENT
+router.get("/assignment/pdf/student/:id",authStudent,async(req,res) => {
+    try{
+        const assignment = await Assignment.findOne({_id: req.params.id});
+        if(!assignment){
+            throw new Error("Please enter a valid url")
+        }
+        res.set('Content-type', 'application/pdf')
         res.send(assignment.document)
     }catch(e){
         console.log(e);
