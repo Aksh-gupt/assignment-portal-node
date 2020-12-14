@@ -102,6 +102,38 @@ router.get("/teacher/allsubmission/:subid/:assignmentid",authTeacher ,async(req,
     }
 })
 
+// THIS IS FOR TEACHER SO THAT TEACHER CAN CHECK STUDENT ASSIGNMENT
+router.get("/teacher/submission/pdf/:subid/:submissionid",authTeacher,async(req,res) => {
+    try{
+        const submission = await Submission.findOne({subid:req.params.subid, _id: req.params.submissionid});
+        if(!submission){
+            throw new Error("Submission not found");
+        }
+        res.set('Content-type', 'application/pdf')
+        res.status(200).send(submission.document)
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+})
+
+// THIS IS FOR STUDENT SO THAT STUDENT CAN THE SUBMISSION THAT STUDENT SUBMIT
+router.get("/student/mysubmission/pdf/:subid/:assignmentid",authStudent,async(req,res) => {
+    try{
+        const submission = await Submission.findOne({
+            assignmentid: req.params.assignmentid, 
+            owner: req.student._id, 
+            subid: req.params.subid
+        })
+        if(!submission){
+            throw new Error("Submission not found");
+        }
+        res.set('Content-type', 'application/pdf')
+        res.status(200).send(submission.document);
+    }catch(e){
+        res.status(400).send(e.message);
+    }
+})
+
 // FROM THIS STUDENT CAN GET ALL SUBMITTED ASSIGNMENT OF A PARTICULAR SUBJECT
 router.get("/student/allsubmission/:subid",authStudent ,async(req,res) => {
     try{
